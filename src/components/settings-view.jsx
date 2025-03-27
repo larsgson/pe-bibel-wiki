@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { useTranslation, Trans } from 'react-i18next'
-import { useState, Suspense } from 'react'
-import ISO6391 from 'iso-639-1'
-import { getEngLangName, langName, navLangList } from '../constants/languages'
+import { navLangList } from '../constants/languages'
+import { allLangNames } from '../constants/all-lang-names'
 import ImageList from '@mui/material/ImageList'
 import ImageListItem from '@mui/material/ImageListItem'
 import ImageListItemBar from '@mui/material/ImageListItemBar'
@@ -33,15 +32,22 @@ const LangGridBar = (props) => {
 const capitalizeFirstLetter = ([ first='', ...rest ]) => [ first.toUpperCase(), ...rest ].join('')
 
 const getLangOptionsObj = (lng) => {
-  return {
-    value: lng,
-    label: lng === "en" ? `${langName[lng]}` :  `${langName[lng]} - ${getEngLangName(lng)}`
+  const langData = allLangNames[lng]
+  if (!langData?.eNm) console.log(`Eng name missing: ${lng}`)
+  let label = ""
+  if ((lng === "en") || (langData?.eNm === langData?.nm)) {
+    label = `${langData?.nm}`
+  } else if (!langData?.nm) {
+    label = `${langData?.eNm}`
+  } else {
+    label = `${langData?.nm} - ${langData?.eNm}`
   }
+  return { value: lng, label }
 }
 
 const navLangOptions = navLangList.map((lng) => getLangOptionsObj(lng))
 
-const langsList = countryData["in"]?.langsInCountry
+const langsList = countryData["pe"]?.langsInCountry
 
 const availableLangOptions = langsList.map((lng) => getLangOptionsObj(lng))
 
@@ -60,13 +66,13 @@ export default function SettingsView() {
           id="controlled-demo"
           disablePortal
           options={navLangOptions}
-          getOptionDisabled={(option) =>option?.value !== "en"}
+          getOptionDisabled={(option) =>option?.value !== "es"}
           sx={{ 
-            width: 300,
+            width: '100%',
             backgroundColor: "lightgrey"
           }}
           renderInput={(params) => <TextField {...params} label="Language" />}
-          value={getLangOptionsObj("en")}
+          value={getLangOptionsObj("es")}
           onChange={(event, newValue) => {
             i18n.changeLanguage(newValue)
           }}
@@ -81,12 +87,13 @@ export default function SettingsView() {
           options={availableLangOptions}
           getOptionDisabled={(option) =>option?.value === i18n.language}
           sx={{ 
-            width: 300,
+            width: '100%',
             backgroundColor: "lightgrey"
           }}
           renderInput={(params) => <TextField {...params} label="Language" />}
           value={getLangOptionsObj(i18n.language)}
           onChange={(event, newValue) => {
+            console.log(newValue)
             i18n.changeLanguage(newValue)
           }}
         />
@@ -98,18 +105,27 @@ export default function SettingsView() {
           sx={{overflowY: 'clip'}}
         >
           {langsList.map((lng) => {
-            const nativeStr = langName[lng]
-            const subtitle = getEngLangName(lng)
-            let title = `${nativeStr}`
+            const langData = allLangNames[lng]
+            let nativeStr = ""
+            let subtitle = undefined
+            if ((lng === "en") || (langData?.eNm === langData?.nm)) {
+              nativeStr = langData?.nm
+            } else if (!langData?.nm) {
+              nativeStr = langData?.eNm
+            } else {
+              nativeStr = langData?.nm
+              subtitle = langData?.eNm
+            }
+            let title = nativeStr
             if (lng.length>3) {
               const countryCode = lng.slice(3,5)
               title = `${nativeStr} (${countryCode})`
             }
-            const shortLang = nativeStr.slice(0,2)
+            const shortLang = capitalizeFirstLetter(lng)
             const isSelected = i18n.language === lng
             const key = lng
-            const imgSrc = countryData["in"]?.pics4langs[lng] 
-            const bkgdColor = `#${countryData["in"]?.color4langs[lng]}`
+            const imgSrc = countryData["pe"]?.pics4langs[lng] 
+            const bkgdColor = `#${countryData["pe"]?.color4langs[lng]}`
             const isBookIcon = false
             return (
               <span key={key}>
@@ -122,7 +138,7 @@ export default function SettingsView() {
                   <ImageListItem onClick={() => i18n.changeLanguage(lng)}>
                     <Typography 
                       sx={{ 
-                        fontSize: '40px',
+                        fontSize: '30px',
                         backgroundColor: bkgdColor
                       }}>
                       {shortLang}
@@ -130,14 +146,14 @@ export default function SettingsView() {
                     <Typography 
                       sx={{ 
                         paddingTop: '12px',
-                        fontSize: '15px',
+                        fontSize: '13px',
                         backgroundColor: '#444'
                       }}>
                       {title}
                     </Typography>
                     <Typography 
                       sx={{ 
-                        fontSize: '12px',
+                        fontSize: '11px',
                         backgroundColor: '#444',
                         paddingBottom: '8px',
                       }}>

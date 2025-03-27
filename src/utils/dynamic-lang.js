@@ -57,7 +57,7 @@ lang === "en"
 
 export const limitToNT = [ "bgl", "kfs", "boc", "dgo", "dom", "kar", "gjk", "kon", "may", "nag", "vav" ]
 
-export const navLangList = [ "en", "hi", "kn", "ml" ]
+export const navLangList = [ "en", "es"]
 
 export const useSerie = (lang,serId) => {
   const checkObj = {
@@ -68,22 +68,44 @@ export const useSerie = (lang,serId) => {
   const is3LetterLang = (lang.length > 2)
   const curLang = is3LetterLang ? lang : lang2to3letters[lang]
   if (checkObj[serId]) return checkObj[serId]
-  else {
-    const useVersion = langVersion[lang]
-    const useLimitedList = limitToNT.includes(lang)
-    const usePath = "https://vachan.sgp1.cdn.digitaloceanspaces.com/audio_bibles/"
+  else if (lang !== "en") {
     return {
-      "bibleBookList": useLimitedList ? newTestamentList : fullBibleList,
-      "vachanServerType": true,
-      "curPath": useVersion ? `${usePath}${curLang}/${useVersion}/` : `${usePath}${curLang}/`,
-      "title": "Audio Bibel",
-      uniqueID: `Vachan-${lang}`,
+      "bibleBookList": fullBibleList,
+      "wordProjectType": true,
+      "curPath": "https://storage.googleapis.com/audio.bibel.wiki/wp/6/", // or http://audio.bibel.wiki/wp/6/
+      "title": "Audio Biblia",
+      uniqueID: "WordProject.ES",
       "description": "Public domain",
-      "language": lang,
+      "language": "es",
       "mediaType": "bible",
       "image": {
-        "origin": "Local",
-        "filename": "pics/Bible_OT.png"
+         "origin": "Local",
+         "filename": "pics/Bible_OT.png"
+      }
+   }   
+  } else {
+    const useVersion = langVersion[lang]
+    const usePath = "https://vachan.sgp1.cdn.digitaloceanspaces.com/audio_bibles/"
+    let curPath = ""
+    if (useVersion) {
+      curPath = `${usePath}${curLang}/${useVersion}/` 
+    } else {
+      curPath = `${usePath}${curLang}/`
+    }
+    const useLimitedList = limitToNT.includes(lang)
+    const vachanServerType = (lang === "en")
+    return {
+      bibleBookList: useLimitedList ? newTestamentList : fullBibleList,
+      vachanServerType,
+      curPath,
+      title: "Audio Bibel",
+      uniqueID: `Vachan-${lang}`,
+      description: "Public domain",
+      language: lang,
+      mediaType: "bible",
+      image: {
+        origin: "Local",
+        filename: "pics/Bible_OT.png"
       }
     }
   }

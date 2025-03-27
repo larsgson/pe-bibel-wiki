@@ -46,7 +46,7 @@ export const langName = {
   vav: "વારલી"
 }
 
-export const navLangList = [ "en", "hi", "kn", "ml" ]
+export const navLangList = [ "es", "en" ]
 
 export const extraEngLangName = {
   as: "Assamese",
