@@ -76,7 +76,7 @@ export const chSelectedImgList = [
   "17v14","18v24","19v10","20v17b","21v15b"
 ]
 
-export const johnPicsLocationUrl = "https://img.bibel.wiki/img/john-pics/"
+export const johnPicsLocationUrl = "https://storage.googleapis.com/img.bibel.wiki/img/john-pics/"
 
 export const getChNode = (inx,title) => {
   return (inx < chInBook)

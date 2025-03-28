@@ -13,7 +13,7 @@ import BibleviewerApp from './bible-viewer-app'
 import HistoryView from './history-view'
 import { useSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
 
-const preNav = "https://img.bibel.wiki/navIcons/"
+const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 
 const HomeView = (props) => {
   const { onStartPlay } = props

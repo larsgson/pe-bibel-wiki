@@ -21,7 +21,7 @@ import useMediaPlayer from "../hooks/useMediaPlayer"
 import { naviSortOrder, chInBook,
           naviBooksLevel1, naviBooksLevel2, naviChapters } from '../constants/naviChapters'
 
-const preNav = "https://img.bibel.wiki/navIcons/"
+const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 
 const SerieGridBar = (props) => {
   // eslint-disable-next-line no-unused-vars

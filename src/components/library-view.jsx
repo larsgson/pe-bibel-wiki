@@ -21,7 +21,7 @@ import { naviSortOrder, chInBook,
 import { useSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
 //import KenBurnsImg from './ken-burns-img'
 
-const preNav = "https://img.bibel.wiki/navIcons/"
+const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 
 const topObjList = {
   "en-jhn-serie": {

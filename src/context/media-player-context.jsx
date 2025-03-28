@@ -99,7 +99,7 @@ console.log("onFinishedPlaying")
       const checkMs = parseInt(checkObj.pos) * 1000
       if (msPos>=checkMs) retImgSrc = checkObj.img
     })
-    return `https://img.bibel.wiki/obsIcons/obs-en-${retImgSrc}.mp4`
+    return `https://storage.googleapis.com/img.bibel.wiki/obsIcons/obs-en-${retImgSrc}.mp4`
   }
 
   const onPlaying = (curPos) => {

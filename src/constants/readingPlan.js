@@ -393,7 +393,7 @@ export const getImgSrcString = (ch,v) => {
   } else if ((imgAltVerse[ch]) && (imgAltVerse[ch][v])) {
     imgVStr = imgAltVerse[ch][v]
   }
-  return `https://img.bibel.wiki/img/john-pics/VB-John${ch}v${imgVStr}.jpg`
+  return `https://storage.googleapis.com/img.bibel.wiki/img/john-pics/VB-John${ch}v${imgVStr}.jpg`
 }
 
 export const gospelOfJohnObjBPlus = {
@@ -447,7 +447,7 @@ export const gospelOfJohnObjBPlus = {
   },  
   image: {
     origin: "ImgId",
-    filename: "https://img.bibel.wiki/img/john-pics/VB-John1v3.jpg"
+    filename: "https://storage.googleapis.com/img.bibel.wiki/img/john-pics/VB-John1v3.jpg"
   },
   language: "en",
   mediaType: "vid",
