@@ -4,6 +4,30 @@ import { unique } from 'shorthash'
 import { pad, getChFreePic } from '../utils/obj-functions'
 import { useTranslation } from 'react-i18next'
 import { serieLang } from '../utils/dynamic-lang'
+import { freeAudioIdOsisMap } from '../constants/osisFreeAudiobible'
+import { contentByCountry } from '../constants/content-by-country-pe'
+import { audioByBID } from '../constants/audio-by-b-id'
+
+const audioTypePriority = {ad: 4, a: 3, ads: 2, as: 1}
+
+const getFilesetId = (langID) => {
+  let filesetID = "" 
+  let curPriority = 0
+  const audioIDList = contentByCountry.PE[langID]?.a
+  audioIDList.forEach(audioID => {
+    const fIDList = audioByBID[audioID]
+    Object.keys(fIDList).forEach(key => {
+      const aType = fIDList[key].t
+      const chkP = audioTypePriority[aType]
+      if (chkP>curPriority) {
+        curPriority = chkP 
+        filesetID = key
+      }
+    })  
+  })
+  console.log(filesetID)
+  return filesetID
+}
 
 const MediaPlayerContext = React.createContext([{}, () => {}])
 const MediaPlayerProvider = (props) => {
@@ -127,6 +151,21 @@ console.log("onFinishedPlaying")
   }
 
   const startPlay = async (topIdStr,inx,curSerie,curEp) => {
+    if (curSerie.bbProjectType) {
+      console.log(curSerie)
+      const fetchPath = `${curSerie?.basePath}/get-audio-url`
+      const filesetID = getFilesetId(curSerie.langID)
+      const response = await fetch(fetchPath, {
+        method: 'POST',
+        body: JSON.stringify({
+          filesetID,
+          bookID: freeAudioIdOsisMap[curEp?.bk],
+          ch: curEp?.id
+        })
+      }).then(response => response.json())
+      curSerie.curPath = response?.data[0]?.path
+      console.log(filesetID)
+    }
     if (!curSerie){ // stop playing
       let newPlayObj
       setStateKeyVal( "curPlay", newPlayObj)
@@ -159,7 +198,8 @@ console.log("onFinishedPlaying")
       }
       const curSerId = curSerie.uniqueID || unique(curSerie.title)
       const lang = serieLang(topIdStr)
-      const navHistEp = {...tmpEp,topIdStr,lang}
+      const langID = curSerie.langID
+      const navHistEp = {...tmpEp,topIdStr,lang,langID}
       const navHist = {...state.navHist, [curSerId]: navHistEp}
       await updateStorage("navHist",navHist)
       await updateStorage("curSerId",curSerId)

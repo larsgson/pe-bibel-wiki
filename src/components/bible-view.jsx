@@ -10,7 +10,7 @@ import ImageListItemBar from '@mui/material/ImageListItemBar'
 import { rangeArray, pad, isEmptyObj } from '../utils/obj-functions'
 import { 
   selectAudioBible,
-  useSerie,
+  getSerie,
   serieLang,
   serieNaviType  
 } from '../utils/dynamic-lang'
@@ -162,7 +162,7 @@ const BibleView = (props) => {
         title: "test"
       }
       const curSerie = {
-        ...useSerie(lng,level0),
+        ...getSerie(lng,level0),
         title: `${bookObj.bk} ${id}`
       }
       onStartPlay(level0,curSerie,bookObj,id)
@@ -202,7 +202,7 @@ const BibleView = (props) => {
   if (curLevel>0){
     if (curLevel===1){
       let lastInx
-      const curSerie = useSerie(lng,level0)
+      const curSerie = getSerie(lng,level0)
       const curList = (curSerie!=null && curSerie.bibleBookList) ? curSerie.bibleBookList : []
       Object.keys(naviBooksLevel1).sort((a,b)=>getSort(a)-getSort(b)
       ).forEach(iconInx => {
@@ -223,7 +223,7 @@ const BibleView = (props) => {
     }
     if (curLevel===2){
       let lastLetter
-      const curSerie = useSerie(lng,level0)
+      const curSerie = getSerie(lng,level0)
       const curList = (curSerie!=null) ? curSerie.bibleBookList : []
       Object.keys(naviChapters[level1]).forEach(iconLetter => {
         const foundList = naviBooksLevel2[level1][iconLetter].filter(x => curList.includes(x))

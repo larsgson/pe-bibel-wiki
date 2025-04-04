@@ -333,6 +333,8 @@ console.log("handleFinishedPlaying")
         const {bk,id} = bibleObj
         let idStr = pad(id)
         let curFName
+        // console.log(curSerie)
+        // console.log(curEp)
         if (curSerie.audioTreasureType) {
           let bBookId = osisIdAudiobibleTitle[bk]
           if (bk==="Ps") {
@@ -369,6 +371,8 @@ console.log("handleFinishedPlaying")
           }
           curFName = curSerie.curPath + "/"
                             + freeAudioIdOsisMap[bk] + idStr + ".mp3"
+        } else if (curSerie.bbProjectType) {
+          curFName = curSerie.curPath
         } else {
           curFName = curSerie.curPath + "/"
           curSerie.pathPattern && curSerie.pathPattern.forEach(part => {

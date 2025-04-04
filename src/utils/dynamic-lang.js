@@ -12,7 +12,8 @@ const bibleDataEnOBSStory = {
       origin: "Local",
       filename: ""
   },
-  language: "eng",
+  language: "en",
+  langID: "en",
   mediaType: "audio",
   episodeList: obsStoryList,
   uniqueID: "uW.OBS.en"
@@ -53,22 +54,21 @@ lang === "en"
   ? "es-audio-bible-WordProject" 
   : lang === "de" 
   ? "de-audio-bible-ML"
-  : `audio-bible-vachan-${lang}` 
+  : `audio-bible-bb-project-${lang}` 
 
-export const limitToNT = [ "bgl", "kfs", "boc", "dgo", "dom", "kar", "gjk", "kon", "may", "nag", "vav" ]
+export const limitToNT = [ "xyz" ] // To Do - get this info from Bible Brain
 
 export const navLangList = [ "en", "es"]
 
-export const useSerie = (lang,serId) => {
+export const getSerie = (lang,serId) => {
   const checkObj = {
     "en-jhn-serie": gospelOfJohnObj,
-    "en-jhn-plan": "videoPlan",
     "en-audio-OBS": bibleDataEnOBSStory,
   }
   const is3LetterLang = (lang.length > 2)
   const curLang = is3LetterLang ? lang : lang2to3letters[lang]
   if (checkObj[serId]) return checkObj[serId]
-  else if (lang !== "en") {
+  else if (lang === "es") {
     return {
       "bibleBookList": fullBibleList,
       "wordProjectType": true,
@@ -77,10 +77,27 @@ export const useSerie = (lang,serId) => {
       uniqueID: "WordProject.ES",
       "description": "Public domain",
       "language": "es",
+      langID: "es",
       "mediaType": "bible",
       "image": {
          "origin": "Local",
          "filename": "pics/Bible_OT.png"
+      }
+    }
+  } else if (lang !== "en") {
+    return {
+      bibleBookList: newTestamentList,
+      bbProjectType: true,
+      basePath: "https://demo-api-bibel-wiki.netlify.app/.netlify/functions", 
+      title: "Audio Biblia",
+      uniqueID: `BibleBrainProject.${lang}`,
+      description: "Public domain",
+      language: lang,
+      langID: lang,
+      mediaType: "bible",
+      image: {
+         origin: "Local",
+         filename: "pics/Bible_OT.png"
       }
    }   
   } else {
@@ -102,6 +119,7 @@ export const useSerie = (lang,serId) => {
       uniqueID: `Vachan-${lang}`,
       description: "Public domain",
       language: lang,
+      langID: lang,
       mediaType: "bible",
       image: {
         origin: "Local",

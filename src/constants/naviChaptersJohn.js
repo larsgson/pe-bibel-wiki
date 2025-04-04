@@ -302,6 +302,7 @@ export const gospelOfJohnObj = {
     es: "https://www.youtube.com/watch?v=yGEPSKZJmCA"
   },  
   language: "en",
+  langID: "en",
   mediaType: "vid"
 }
 

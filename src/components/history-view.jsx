@@ -26,6 +26,7 @@ const HistoryView = (props) => {
         {epList?.map((item) => {
           const bk = item?.ep?.bookObj
           const useEp = item?.ep
+          console.log(useEp)
           let useImg = useEp.image ? getImgOfObj(useEp,t) : useEp.imageSrc
           if (bk) {
             const imgObj = getChFreePic(bk,useEp?.id)
@@ -48,9 +49,9 @@ const HistoryView = (props) => {
               <ItemBarEpisode
                 // serie={serie}
                 episode={item}
-                descr={item.descr}
+                descr={`${item.descr} - (${useEp.langID})`}
                 // useIcon={useIcon}
-                title={t(item.title,{lng: "en"})}
+                title={t(item.title,{lng: useEp.langID})}
                 onClick={(e) => handleClickItemIndex(e,item)}
               />
               {(width<480) && false && (

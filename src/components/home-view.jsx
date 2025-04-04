@@ -11,7 +11,7 @@ import useMediaPlayer from "../hooks/useMediaPlayer"
 import useBrowserData from "../hooks/useBrowserData"
 import BibleviewerApp from './bible-viewer-app'
 import HistoryView from './history-view'
-import { useSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
+import { getSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
 
 const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 
@@ -29,7 +29,7 @@ const HomeView = (props) => {
     const useCh = obj?.ep?.id
     const useBk = obj?.ep?.bk
     const curSerie = {
-      ...useSerie(lng,useLevel0),
+      ...getSerie(lng,useLevel0),
       language: serieLang(useLevel0),
     }
     if (serieNaviType(useLevel0) === "audioBible") {

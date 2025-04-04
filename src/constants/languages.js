@@ -1,71 +1,16 @@
 import {engLangNames} from './engLangNames';
 
 export const lang2to3letters = {
-  as: "asm",
-  bn: "ben",
   en: "eng",
-  gu: "guj",
-  he: "hbo",
-  hi: "hin",
-  kn: "kan",
-  ml: "mal",
-  mr: "mar",
-  ne: "nep",
-  pu: "pan",
-  ta: "tam",
-  te: "tel",
-  ur: "urd",
+  es: "spa",
 }
 
 export const langName = {
-  as: "অসমীয়া", 
-  bgl: "Baghlayani", 
-  bn: "বাঙালি", 
-  kfs: "बिलासपुरी", 
-  boc: "Bommala", 
-  dgo: "डोगरी", 
-  dom: "Dommri", 
-  en: "English", 
-  gu: "ગુજરાતી", 
-  har: "हरियाणवी", 
-  hi: "हिंदी", 
-  kar: "कच्छ",
-  kn: "ಕನ್ನಡ", 
-  gjk: "કોલી કચ્છી", 
-  kon: "Kongaru", 
-  ml: "മലയാളം", 
-  mr: "मराठी", 
-  may: "मायला मराठी", 
-  nag: "Nagamese", 
-  ne: "नेपाली", 
-  ory: "ଓଡିଆ", 
-  pu: "ਪੰਜਾਬੀ", 
-  ta: "தமிழ்", 
-  te: "తెలుగు", 
-  ur: "उर्दू", 
-  vav: "વારલી"
 }
 
 export const navLangList = [ "es", "en" ]
 
 export const extraEngLangName = {
-  as: "Assamese",
-  bgl: "Baghlayani", 
-  bn: "Bengali",
-  kfs: "Bilaspuri", 
-  boc: "Bommala", 
-  dgo: "Dogri", 
-  dom: "Dommri", 
-  har: "Haryanvi",
-  kar: "Kachha",
-  kn: "Kannada",
-  gjk: "Koli-Kachhi", 
-  kon: "Kongaru", 
-  may: "Mayla-Marathi",
-  nag: "Nagamese", 
-  ory: "Odia",
-  pu: "Punjabi",
-  vav: "Varli-Davri"
 }
 
 

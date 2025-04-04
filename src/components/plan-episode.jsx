@@ -135,8 +135,7 @@ const PlanEpisode = (props) => {
                   pl: 1, 
                   pt: 0.5, 
                   fontWeight: 100,
-                  fontSize: '85%',
-                  width: '100%'
+                  fontSize: '85%'
                 }}>
               <NewlineText text={t(curEp.descr,{lng})}/>
            </Typography>}

@@ -18,7 +18,7 @@ import GospelJohnNavi from './gospel-john-video-navi'
 import OBSPictureNavigationApp from './obs-viewer-app'
 import { naviSortOrder, chInBook,
           naviBooksLevel1, naviBooksLevel2, naviChapters } from '../constants/naviChapters'
-import { useSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
+import { getSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
 //import KenBurnsImg from './ken-burns-img'
 
 const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
@@ -153,7 +153,7 @@ const LibraryView = (props) => {
       setCurLevel(4)
     } else {
       const bookObj = {...naviChapters[level1][level2][level3], level1, level2, level3}
-      const curSerie = useSerie(lng,level0)
+      const curSerie = getSerie(lng,level0)
       // const {curSerie} = curPlay  
       onStartPlay(level0,curSerie,bookObj,id)
     }
@@ -198,7 +198,7 @@ const LibraryView = (props) => {
     })
   } else if (curLevel===1){
     let lastInx
-    const curSerie = useSerie(lng,level0)
+    const curSerie = getSerie(lng,level0)
     const curList = (curSerie!=null && curSerie.bibleBookList) ? curSerie.bibleBookList : []
     Object.keys(naviBooksLevel1).sort((a,b)=>getSort(a)-getSort(b)
     ).forEach(iconInx => {
@@ -219,7 +219,7 @@ const LibraryView = (props) => {
   }
   if (curLevel===2){
     let lastLetter
-    const curSerie = useSerie(lng,level0)
+    const curSerie = getSerie(lng,level0)
     const curList = (curSerie!=null) ? curSerie.bibleBookList : []
     Object.keys(naviChapters[level1]).forEach(iconLetter => {
       const foundList = naviBooksLevel2[level1][iconLetter].filter(x => curList.includes(x))
