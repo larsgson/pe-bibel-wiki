@@ -28,12 +28,13 @@ const HomeView = (props) => {
     const useLevel0 = obj?.ep?.topIdStr
     const useCh = obj?.ep?.id
     const useBk = obj?.ep?.bk
+    const langID = obj?.ep?.langID
     const curSerie = {
-      ...getSerie(lng,useLevel0),
-      language: serieLang(useLevel0),
+      ...getSerie(langID,useLevel0),
+      language: langID,
     }
     if (serieNaviType(useLevel0) === "audioBible") {
-      const useLang = serieLang(useLevel0)
+      const useLang = langID
       curSerie.title = (useCh!=null) ? getOsisChTitle(useBk,useCh,useLang) : undefined
       const epObj = {
         ...obj?.ep,
