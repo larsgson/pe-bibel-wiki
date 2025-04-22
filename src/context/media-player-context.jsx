@@ -1,16 +1,18 @@
 import React, { useState, useEffect, useCallback  } from 'react'
 import { apiSetStorage, apiGetStorage, apiObjGetStorage, apiObjSetStorage } from '../utils/api'
 import { unique } from 'shorthash'
-import { pad, getChFreePic } from '../utils/obj-functions'
+import { pad, getChFreePic, getChFreePicFirstEntry } from '../utils/obj-functions'
 import { useTranslation } from 'react-i18next'
-import { serieLang } from '../utils/dynamic-lang'
-import { freeAudioIdOsisMap } from '../constants/osisFreeAudiobible'
+import { serieLang, serieNaviType } from '../utils/dynamic-lang'
+import { freeAudioIdOsisMap, osisFromFreeAudioId } from '../constants/osisFreeAudiobible'
 import { contentByCountry } from '../constants/content-by-country-pe'
 import { audioByBID } from '../constants/audio-by-b-id'
+import { osisIconList } from '../constants/osisIconList'
+import { checkAudioHasTimestamps } from '../utils/audio-with-timestamps'
 
 const audioTypePriority = {ad: 4, a: 3, ads: 2, as: 1}
 
-const getFilesetId = (langID) => {
+const getAudioFilesetId = (langID) => {
   let filesetID = "" 
   let curPriority = 0
   const audioIDList = contentByCountry.PE[langID]?.a
@@ -18,15 +20,30 @@ const getFilesetId = (langID) => {
     const fIDList = audioByBID[audioID]
     Object.keys(fIDList).forEach(key => {
       const aType = fIDList[key].t
-      const chkP = audioTypePriority[aType]
+      let chkP = audioTypePriority[aType]
+      // Always prioritise higher for audio with timestamps - add 10
+      if (checkAudioHasTimestamps(key)) chkP += 10
       if (chkP>curPriority) {
         curPriority = chkP 
         filesetID = key
       }
     })  
   })
-  console.log(filesetID)
   return filesetID
+}
+
+const getTextFilesetId = (langID,audioID) => { 
+  let retFilesetID = "" 
+  const textIDList = contentByCountry.PE[langID]?.t
+  if (textIDList.length>0) {
+    retFilesetID = textIDList[0] // select first entry by default
+    if (textIDList.length>1) // go through list, if more than one
+    textIDList.forEach(textID => {
+      // Prioritise equal to audioID, if exists
+      if (textID === audioID) retFilesetID = audioID
+    })
+  }
+  return retFilesetID
 }
 
 const MediaPlayerContext = React.createContext([{}, () => {}])
@@ -38,7 +55,13 @@ const MediaPlayerProvider = (props) => {
   const setStateKeyVal = (key,val) => setState(state => ({ ...state, [key]: val }))
 
   const [isPaused, setIsPaused] = useState(false)
-  const [imgPos, setImgPos] = useState({});
+  const [imgPosOBS, setImgPosOBS] = useState({})
+  const [imgPosAudio, setImgPosAudio] = useState({})
+  const [verseTextPosAudio, setVerseTextPosAudio] = useState([])
+  const [verseText, setVerseText] = useState({})
+  const apiBasePath = "https://demo-api-bibel-wiki.netlify.app/.netlify/functions"
+  const [timestampParamStr, SetTimestampParamStr] = useState("")
+  const [textParamStr, SetTextParamStr] = useState("")
 
   const fetchJSONDataFrom = useCallback(async (inx) => {
     const response = await fetch(`data/img_pos${pad(inx +1)}.json`, {
@@ -48,7 +71,7 @@ const MediaPlayerProvider = (props) => {
       }
     });
     const data = await response.json();
-    setImgPos((prev) => ({
+    setImgPosOBS((prev) => ({
       ...prev,
       [inx]: data,
     }));
@@ -73,6 +96,71 @@ const MediaPlayerProvider = (props) => {
     getNavHist()
   }, []);
 
+
+  useEffect(() => {
+    const getTimecodeData = async () => {
+      if (timestampParamStr.length>0) {
+        const fetchTimestampPath = `${apiBasePath}/get-timestamps`
+        const curApiParam = JSON.parse(timestampParamStr)
+        const curBook = osisFromFreeAudioId(curApiParam?.bookID)
+        const curCh = curApiParam?.ch
+        let curIconList = []
+        if (osisIconList[curBook]) {
+          curIconList = osisIconList[curBook][curCh] || []
+          if (curIconList.length>1) {
+            const resTimestamp = await fetch(fetchTimestampPath, {
+              method: 'POST',
+              body: timestampParamStr
+            })
+            .then(resTimestamp => resTimestamp.json())
+            .catch(error => console.error(error))
+            setVerseTextPosAudio(resTimestamp?.data)
+            const timestampPoints = curIconList.map((verse,inx) => {
+              let vInx = parseInt(verse.slice(0,2))
+              // Check for double entry (i.e. with added letter at the end)
+              if ((verse.length>2) && (inx>0)) {
+                const vPrev = parseInt(curIconLis[inx-1].slice(0,2))
+                if (curIconLis[inx+1]) {
+                  const vNext = parseInt(curIconLis[inx+1].slice(0,2))
+                  const diff = cNext - vPrev
+                  // if possible then move the double to one verse later - if diff > 1
+                  if (diff>1) vInx += 1
+                }
+              }
+              const pos = resTimestamp?.data[vInx]?.timestamp
+              return {
+                img: `${pad(curCh)}_${verse}`,
+                pos
+              }
+            })
+            setImgPosAudio(timestampPoints)
+          }  
+        }
+      }
+    }
+    getTimecodeData()
+  }, [timestampParamStr]);
+
+  useEffect(() => {
+    const getTextData = async () => {
+      if (textParamStr.length>0) {
+        const fetchTextPath = `${apiBasePath}/get-text`
+        const resText = await fetch(fetchTextPath, {
+          method: 'POST',
+          body: textParamStr
+        })
+        .then(resText => resText.json())
+        .catch(error => console.error(error))
+        const useVerseText = {}
+        resText?.data.forEach(obj => {
+          useVerseText[obj.verse_start] = obj.verse_text
+        })
+        setVerseText(useVerseText)
+      }
+    }
+    getTextData()
+  }, [textParamStr]);
+  
   const togglePlay = () => {
 //    state.isPlaying ? player.pause() : player.play()
     setStateKeyVal( "isPlaying", !state.isPlaying )
@@ -83,7 +171,7 @@ const MediaPlayerProvider = (props) => {
   }
 
   const onFinishedPlaying = () => {
-console.log("onFinishedPlaying")
+    console.log("onFinishedPlaying")
     if (state.curPlay) {
       apiObjSetStorage(state.curPlay,"mSec",state.curEp.begTimeSec * 1000) // Reset the position to beginning
       const {curSerie, curEp} = state.curPlay
@@ -113,18 +201,49 @@ console.log("onFinishedPlaying")
     setStateKeyVal( "curEp", undefined )
   }
 
-  const updateImgBasedOnPos = ( curInx, msPos ) => {
+  const updateImgBasedOnPos = ( navType, ep, curInx, msPos ) => {
     let checkMsPosArray = []
-    if (imgPos) {
-      checkMsPosArray = imgPos[ curInx ]
+    let curImgSrc = ""
+    let retStr = ""
+    if ((navType === "audioStories") && (imgPosOBS)) {
+      checkMsPosArray = imgPosOBS[ curInx ]
+      curImgSrc = `${pad(curInx+1)}-01`
+    } else if (navType === "audioBible") {
+      checkMsPosArray = imgPosAudio
     }
-    let retImgSrc = `${pad(curInx+1)}-01`
-    checkMsPosArray?.map(checkObj => {
+    (checkMsPosArray?.length>0) && checkMsPosArray?.map(checkObj => {
       const checkMs = parseInt(checkObj.pos) * 1000
-      if (msPos>=checkMs) retImgSrc = checkObj.img
-    })
-    return `https://storage.googleapis.com/img.bibel.wiki/obsIcons/obs-en-${retImgSrc}.mp4`
+      if (msPos>=checkMs) curImgSrc = checkObj.img
+    })  
+    if (navType === "audioStories") {
+      retStr = `https://storage.googleapis.com/img.bibel.wiki/obsIcons/obs-en-${curImgSrc}.mp4`
+    } else if (navType === "audioBible") {
+      const bk = ep?.bookObj
+      if (curImgSrc && (curImgSrc?.length > 0)) {
+        retStr = getChFreePic(bk,ep?.id,curImgSrc)
+      } else {
+        const tempImgObj = getChFreePicFirstEntry(bk,ep?.id)
+        retStr = tempImgObj.imgSrc
+      }
+    }
+    return retStr
   }
+
+  const updateTextBasedOnPos = ( msPos ) => {
+    let retStr = ""
+    let checkVerseInx = 0
+    const offsetMs = 300
+    const checkMsPosArray = verseTextPosAudio
+    if ((checkMsPosArray) && (checkMsPosArray?.length>0)) {
+      checkMsPosArray?.map(checkObj => {
+        const checkMs = checkObj.timestamp * 1000
+        if ((msPos+offsetMs)>=checkMs) checkVerseInx = parseInt(checkObj.verse_start)
+      })
+    }
+    if (checkVerseInx>0) retStr = verseText[checkVerseInx] || ""
+    return retStr
+  }
+
 
   const onPlaying = (curPos) => {
     const curImgSrc = state?.syncImgSrc
@@ -132,16 +251,24 @@ console.log("onFinishedPlaying")
     const msPos = curPos?.position
     const curSerId = state?.curPlay?.curSerie?.uniqueID
     let nextImgSrc
-    if (curSerId === "uW.OBS.en") {
-      nextImgSrc = updateImgBasedOnPos( curInx, msPos )
-    } else if (state?.curPlay?.curSerie?.mediaType === "bible") {
-      const ep = state?.curPlay?.curEp
-      const bk = ep?.bookObj
-      const imgObj = getChFreePic(bk,ep?.id)
-      nextImgSrc = imgObj?.imgSrc
+    const curEp = state?.curPlay?.curEp
+    const topIdStr = curEp?.topIdStr
+    const nType = serieNaviType(topIdStr)
+
+    if ((curSerId === "uW.OBS.en") || (nType === "audioBible")) {
+      nextImgSrc = updateImgBasedOnPos( nType, curEp, curInx, msPos )
     }
     if (nextImgSrc!==curImgSrc) {
       setStateKeyVal( "syncImgSrc", nextImgSrc )
+    }
+    let nextText
+    const curVerseText = state?.syncVerseText
+    if (nType === "audioBible") {
+      nextText = updateTextBasedOnPos( msPos )
+    }
+    if (nextText!==curVerseText) {
+      console.log(nextText)
+      setStateKeyVal( "syncVerseText", nextText )
     }
     setStateKeyVal( "curPos", curPos )
   }
@@ -152,19 +279,35 @@ console.log("onFinishedPlaying")
 
   const startPlay = async (topIdStr,inx,curSerie,curEp) => {
     if (curSerie.bbProjectType) {
-      console.log(curSerie)
-      const fetchPath = `${curSerie?.basePath}/get-audio-url`
-      const filesetID = getFilesetId(curSerie.langID)
+      const fetchPath = `${apiBasePath}/get-audio-url`
+      // 'get-timestamps'
+      const audioFilesetID = getAudioFilesetId(curSerie.langID)
       const response = await fetch(fetchPath, {
         method: 'POST',
         body: JSON.stringify({
-          filesetID,
+          filesetID: audioFilesetID,
           bookID: freeAudioIdOsisMap[curEp?.bk],
-          ch: curEp?.id
+          ch: curEp?.id,
+          query: ["path"]
         })
       }).then(response => response.json())
-      curSerie.curPath = response?.data[0]?.path
-      console.log(filesetID)
+      curSerie.curPath = response?.data?.path
+      SetTextParamStr(JSON.stringify({
+        filesetID: getTextFilesetId(curSerie.langID,audioFilesetID),
+        bookID: freeAudioIdOsisMap[curEp?.bk],
+        ch: curEp?.id,
+        query: ["verse_text", "verse_start"]
+        // const response = await fetch('/.netlify/functions/get-text', {
+      }))
+      if (checkAudioHasTimestamps(audioFilesetID)) {
+        // fetch timecode in the background
+        SetTimestampParamStr(JSON.stringify({
+          filesetID: audioFilesetID,
+          bookID: freeAudioIdOsisMap[curEp?.bk],
+          ch: curEp?.id,
+          query: ["verse_start", "timestamp"]
+        }))
+      }
     }
     if (!curSerie){ // stop playing
       let newPlayObj
@@ -198,14 +341,22 @@ console.log("onFinishedPlaying")
       }
       const curSerId = curSerie.uniqueID || unique(curSerie.title)
       const lang = serieLang(topIdStr)
+      const nType = serieNaviType(topIdStr)
       const langID = curSerie.langID
       const navHistEp = {...tmpEp,topIdStr,lang,langID}
       const navHist = {...state.navHist, [curSerId]: navHistEp}
       await updateStorage("navHist",navHist)
       await updateStorage("curSerId",curSerId)
       const curInx = tmpEp?.id
-      const syncImgSrc = (curSerId === "uW.OBS.en") ? updateImgBasedOnPos( curInx, 0 ) : ""
-      setState(state => ({...state, navHist, syncImgSrc, curSerId, curSerie, curEp: tmpEp}))
+      const syncImgSrc = 
+        ((curSerId === "uW.OBS.en") || (nType === "audioBible")) 
+          ? updateImgBasedOnPos( nType, curEp, curInx, 0 ) 
+          : ""
+      const syncVerseText =
+        (nType === "audioBible") 
+      ? updateTextBasedOnPos( 0 ) 
+      : ""
+  setState(state => ({...state, navHist, syncImgSrc, syncVerseText, curSerId, curSerie, curEp: tmpEp}))
       // setState(state => ({...state, syncImgSrc, curSerId, curSerie, curEp: tmpEp}))
     }
   }

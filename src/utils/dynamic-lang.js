@@ -1,7 +1,7 @@
 import { obsStoryList } from '../constants/obsHierarchy'
 import { fullBibleList, newTestamentList } from '../constants/bibleData'
 import { lang2to3letters } from '../constants/languages'
-import { gospelOfJohnObj } from '../constants/naviChaptersJohn'
+import { gospelOfJohnObj, gospelOfJohnPlanObj } from '../constants/naviChaptersJohn'
 
 const bibleDataEnOBSStory = {
   freeType: false,
@@ -62,7 +62,10 @@ export const navLangList = [ "en", "es"]
 
 export const getSerie = (lang,serId) => {
   const checkObj = {
+    "en-jhn-plan": gospelOfJohnPlanObj,
+    "es-jhn-plan": gospelOfJohnPlanObj,
     "en-jhn-serie": gospelOfJohnObj,
+    "es-jhn-serie": gospelOfJohnObj,
     "en-audio-OBS": bibleDataEnOBSStory,
   }
   const is3LetterLang = (lang.length > 2)
@@ -88,7 +91,6 @@ export const getSerie = (lang,serId) => {
     return {
       bibleBookList: newTestamentList,
       bbProjectType: true,
-      basePath: "https://demo-api-bibel-wiki.netlify.app/.netlify/functions", 
       title: "Audio Biblia",
       uniqueID: `BibleBrainProject.${lang}`,
       description: "Public domain",
@@ -141,19 +143,22 @@ export const serieLang = (id) => {
     "ro-audio-bible-WordProject": "ro",
     "de-jhn-serie": "de",
     "en-jhn-serie": "en",
+    "es-jhn-serie": "es",
     "de-jhn-plan": "de",
     "en-jhn-plan": "en",
+    "es-jhn-plan": "es",
     "en-audio-OBS": "en",
   }
-  // return checkObj[id]
-  return "en"
+  return checkObj[id] || "en"
 }
 
 export const serieNaviType =(id) => {
   const checkObj = {
     "en-audio-bible-WEB": "audioBible",
     "en-jhn-serie": "videoSerie",
+    "es-jhn-serie": "videoSerie",
     "en-jhn-plan": "videoPlan",
+    "es-jhn-plan": "videoPlan",
     "en-audio-OBS": "audioStories",
   }
   return checkObj[id] || "audioBible"

@@ -3,7 +3,7 @@ import CardContent from '@mui/material/CardContent'
 import ImageList from '@mui/material/ImageList'
 import ImageListItem from '@mui/material/ImageListItem'
 import Typography from '@mui/material/Typography'
-import { getChFreePic } from '../utils/obj-functions'
+import { getChFreePicFirstEntry } from '../utils/obj-functions'
 import ItemBarEpisode from './item-bar-episode'
 import { getImgOfObj } from '../utils/obj-functions'
 import useBrowserData from '../hooks/useBrowserData'
@@ -26,10 +26,9 @@ const HistoryView = (props) => {
         {epList?.map((item) => {
           const bk = item?.ep?.bookObj
           const useEp = item?.ep
-          console.log(useEp)
           let useImg = useEp.image ? getImgOfObj(useEp,t) : useEp.imageSrc
           if (bk) {
-            const imgObj = getChFreePic(bk,useEp?.id)
+            const imgObj = getChFreePicFirstEntry(bk,useEp?.id)
             useImg = imgObj?.imgSrc
           } 
           return (

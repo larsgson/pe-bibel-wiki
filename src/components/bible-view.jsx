@@ -37,7 +37,7 @@ const SerieGridBar = (props) => {
 const BibleView = (props) => {
   // eslint-disable-next-line no-unused-vars
   const { size } = useBrowserData()
-  const { curPlay, syncImgSrc } = useMediaPlayer()
+  const { curPlay, syncImgSrc, syncVerseText } = useMediaPlayer()
   const isPlaying = !isEmptyObj(curPlay)
   const { t, i18n } = useTranslation()
   const { onExitNavigation, onStartPlay } = props
@@ -322,7 +322,7 @@ const BibleView = (props) => {
         </ImageList>
         <Typography
           type="title"
-        ><br/><br/></Typography>
+        >{syncVerseText}<br/><br/></Typography>
       </>)}
     </div>
   )

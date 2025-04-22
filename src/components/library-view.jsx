@@ -24,13 +24,23 @@ import { getSerie, serieLang, serieNaviType } from '../utils/dynamic-lang'
 const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 
 const topObjList = {
+  "es-jhn-serie": {
+    title: "Evangelio de Juan",
+    imgSrc: preNav + "VB-John1v1.png",
+    subtitle: "Serie de vídeos"
+  },
+  "es-jhn-plan": {
+    title: "Juan",
+    imgSrc: preNav + "VB-John1v3.png",
+    subtitle: "diariamente - en 90 días"
+  },
   "en-jhn-serie": {
     title: "Gospel of John",
     imgSrc: preNav + "VB-John1v1.png",
     subtitle: "Video serie"
   },
   "en-jhn-plan": {
-    title: "Gospel of John",
+    title: "John",
     imgSrc: preNav + "VB-John1v3.png",
     subtitle: "daily - in 90 days"
   },
@@ -55,7 +65,7 @@ const SerieGridBar = (props) => {
 const LibraryView = (props) => {
   // eslint-disable-next-line no-unused-vars
   const { size, width } = useBrowserData()
-  const { curPlay, syncImgSrc } = useMediaPlayer()
+  const { curPlay, syncImgSrc, syncVerseText } = useMediaPlayer()
   const isPlaying = !isEmptyObj(curPlay)
   const { t, i18n } = useTranslation()
   const { onExitNavigation, onStartPlay } = props
@@ -70,8 +80,6 @@ const LibraryView = (props) => {
   // eslint-disable-next-line no-unused-vars
   const getSort = (val) => naviSortOrder.indexOf(parseInt(val))
   const addSkipLevel = (level) => setSkipLevelList([...skipLevelList,level])
-
-  const lng = i18n.language
 
   const getChIcon = (key,lev1,lev2,bookObj,ch) => {
     let checkIcon = "000-" + pad(lev1)
@@ -103,12 +111,12 @@ const LibraryView = (props) => {
       }
 // Book Icon - To Do - to be added in the future
 //    imgSrc = preBook +getOsisIcon(bk) +".png"
-      checkTitle = t(bk, { lng })
+      checkTitle = t(bk, {  lng: serieLang(level0) })
     } else {
-      checkTitle = t(checkIcon, { lng })
+      checkTitle = t(checkIcon, {  lng: serieLang(level0) })
     }
     imgSrc = preNav +checkIcon +".png"
-    let title = (ch!=null) ? getOsisChTitle(bk,ch,lng) : checkTitle
+    let title = (ch!=null) ? getOsisChTitle(bk,ch,serieLang(level0)) : checkTitle
     let subtitle
     if (bk==null){ // level 1 and 2
       const checkStr = checkIcon + "-descr"
@@ -119,7 +127,7 @@ const LibraryView = (props) => {
       if ((beg!=null)&&(end!=null)){
         subtitle = (beg===end) ? beg : beg + " - " + end
       }
-      const choiceTitle = getChoiceTitle(bk,key+1,lng)
+      const choiceTitle = getChoiceTitle(bk,key+1,serieLang(level0))
       if (choiceTitle!=null) {
         title += " " + subtitle
         subtitle = choiceTitle
@@ -153,7 +161,7 @@ const LibraryView = (props) => {
       setCurLevel(4)
     } else {
       const bookObj = {...naviChapters[level1][level2][level3], level1, level2, level3}
-      const curSerie = getSerie(lng,level0)
+      const curSerie = getSerie(serieLang(level0),level0)
       // const {curSerie} = curPlay  
       onStartPlay(level0,curSerie,bookObj,id)
     }
@@ -198,7 +206,7 @@ const LibraryView = (props) => {
     })
   } else if (curLevel===1){
     let lastInx
-    const curSerie = getSerie(lng,level0)
+    const curSerie = getSerie(serieLang(level0),level0)
     const curList = (curSerie!=null && curSerie.bibleBookList) ? curSerie.bibleBookList : []
     Object.keys(naviBooksLevel1).sort((a,b)=>getSort(a)-getSort(b)
     ).forEach(iconInx => {
@@ -219,7 +227,7 @@ const LibraryView = (props) => {
   }
   if (curLevel===2){
     let lastLetter
-    const curSerie = getSerie(lng,level0)
+    const curSerie = getSerie(serieLang(level0),level0)
     const curList = (curSerie!=null) ? curSerie.bibleBookList : []
     Object.keys(naviChapters[level1]).forEach(iconLetter => {
       const foundList = naviBooksLevel2[level1][iconLetter].filter(x => curList.includes(x))
@@ -254,6 +262,7 @@ const LibraryView = (props) => {
       })
     }
   }
+  const lng = serieLang(level0)
   let useCols = 3
   if (size==="xs") useCols = 2
   else if (size==="lg") useCols = 4
@@ -331,7 +340,7 @@ const LibraryView = (props) => {
         </ImageList>
         <Typography
           type="title"
-        ><br/><br/></Typography>
+        >{syncVerseText}<br/><br/></Typography>
       </>)}
     </div>
   )

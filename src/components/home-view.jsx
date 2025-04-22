@@ -18,7 +18,7 @@ const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
 const HomeView = (props) => {
   const { onStartPlay } = props
   // eslint-disable-next-line no-unused-vars
-  const { navHist, startPlay, curPlay, syncImgSrc } = useMediaPlayer()
+  const { navHist, startPlay, curPlay, syncImgSrc, syncVerseText } = useMediaPlayer()
   const { width } = useBrowserData()
   const isPlaying = !isEmptyObj(curPlay)
   const { t, i18n } = useTranslation()
@@ -26,14 +26,18 @@ const HomeView = (props) => {
 
   const handleHistoryClick = (obj) => {
     const useLevel0 = obj?.ep?.topIdStr
+    console.log(obj)
+    console.log(useLevel0)
     const useCh = obj?.ep?.id
     const useBk = obj?.ep?.bk
-    const langID = obj?.ep?.langID
+    const langID = obj?.ep?.langID || obj?.ep?.lang
     const curSerie = {
       ...getSerie(langID,useLevel0),
       language: langID,
     }
-    if (serieNaviType(useLevel0) === "audioBible") {
+    console.log(curSerie)
+    const serNType = serieNaviType(useLevel0)
+    if ((serNType === "audioBible") || (serNType === "videoSerie") || (serNType === "videoPlan")) {
       const useLang = langID
       curSerie.title = (useCh!=null) ? getOsisChTitle(useBk,useCh,useLang) : undefined
       const epObj = {
@@ -42,8 +46,6 @@ const HomeView = (props) => {
       }
       startPlay(useLevel0,useCh,curSerie,epObj)
     } else if (serieNaviType(useLevel0) === "audioStories") {
-      startPlay(useLevel0,useCh,curSerie,obj?.ep)
-    } else if (serieNaviType(useLevel0) === "videoSerie") {
       startPlay(useLevel0,useCh,curSerie,obj?.ep)
     }
   }
@@ -112,9 +114,20 @@ const HomeView = (props) => {
   const dailyList = navHist && Object.keys(navHist).filter(key => {
     const navObj = navHist[key]
     const useLevel0 = navObj?.topIdStr
-    return (
-      (serieNaviType(useLevel0) === "videoPlan") 
-    )
+    return (serieNaviType(useLevel0) === "videoPlan")     
+  }).map(key => {
+    const navObj = navHist[key]
+    const useLevel0 = navObj?.topIdStr
+    const useLng = serieLang(useLevel0)
+    return {
+      key,
+      id: key,
+      image: navObj.image,
+      langID: useLng,
+      title: t(navObj.title, { lng: useLng }),
+      descr: t(navObj.descr, { lng: useLng }),
+      ep: navHist[key]
+    }
   })
 
   const myList = navHist && Object.keys(navHist).filter(key => {
@@ -128,14 +141,14 @@ const HomeView = (props) => {
   }).map(key => {
     const navObj = navHist[key]
     const useLevel0 = navObj?.topIdStr
+    const serNType = serieNaviType(useLevel0)
     // if ((useLevel0 === "en-audio-bible-WEB") || (useLevel0 === "de-audio-bible-ML")) {
-    if (serieNaviType(useLevel0) === "audioBible") {
+    if (serNType === "audioBible") {
       const useLevel1 = navObj?.bookObj?.level1
       const useLevel2 = navObj?.bookObj?.level2
       const useBObj = navObj?.bookObj
       const useCh = navObj?.id
-      const useLng = i18n.language
-      const epObj = getChIcon(useCh,useLevel1,useLevel2,useBObj,useCh,useLng)
+      const epObj = getChIcon(useCh,useLevel1,useLevel2,useBObj,useCh,serieLang(useLevel0))
       return {
         key,
         id: key,
@@ -144,7 +157,7 @@ const HomeView = (props) => {
         descr: `${navObj.bk} ${navObj.id}`, // epObj.subtitle,
         ep: navHist[key]
       }
-    } else if (serieNaviType(useLevel0) === "audioStories") {
+    } else if (serNType === "audioStories") {
       return {
         key,
         id: key,
@@ -153,7 +166,7 @@ const HomeView = (props) => {
         descr: navObj.subtitle,
         ep: navHist[key]
       }  
-    } else if (serieNaviType(useLevel0) === "videoSerie") {
+    } else if ((serNType === "videoSerie") || (serNType === "videoPlan")) {
       const useLng = serieLang(useLevel0)
       return {
         key,
@@ -170,7 +183,7 @@ const HomeView = (props) => {
     const curMediaType = curPlay?.curSerie?.mediaType
     showSyncImage = (curMediaType==="audio") || (curMediaType==="bible")
   }
-  const getExtFilename = (fname) => fname?.slice((fname?.lastIndexOf(".") - 1 >>> 0) + 2);
+  const getExtFilename = (fname) => (fname) && fname?.slice((fname?.lastIndexOf(".") - 1 >>> 0) + 2)
   const isVideoSrc = (getExtFilename(syncImgSrc)?.toLowerCase() === 'mp4')
   return (
     <div>
@@ -178,7 +191,7 @@ const HomeView = (props) => {
         type="title"
       >Today</Typography>)}
       {(!isPlaying) && dailyList && (dailyList.length>0) && (
-        <BibleviewerApp topIdStr={"en-audio-bible-WEB"} lng={"en"}/>
+        <BibleviewerApp topIdStr={dailyList[0].topIdStr} lng={dailyList[0].langID}/>
       )}
       {(showSyncImage) && (
       <>
@@ -200,7 +213,7 @@ const HomeView = (props) => {
         </ImageList>
         <Typography
           type="title"
-        ><br/><br/></Typography>
+        >{syncVerseText}<br/><br/></Typography>
       </>)}
       {(!isPlaying) && (
         <Grid container alignItems="center" spacing={2}>

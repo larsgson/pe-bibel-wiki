@@ -91,7 +91,7 @@ export const getImgOfObj = (ser,t) => {
   return retStr
 }
 
-export const getChFreePic = (bookObj,ch) => {
+export const getChFreePicFirstEntry = (bookObj,ch) => {
   const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
   const picsPreNav = "https://storage.googleapis.com/img.bibel.wiki/img/free-pics/"
   const {level1,level2} = bookObj
@@ -133,6 +133,31 @@ export const getChFreePic = (bookObj,ch) => {
     imgSrc,
     ch,
   }
+}
+
+export const getChFreePic = (bookObj,ch,verseStr) => {
+  const preNav = "https://storage.googleapis.com/img.bibel.wiki/navIcons/"
+  const picsPreNav = "https://storage.googleapis.com/img.bibel.wiki/img/free-pics/"
+  const {level1,level2} = bookObj
+  let checkIcon = "000-" + pad(level1)
+  if (level2!=null) checkIcon = "00-" + pad(level1) + level2
+  let useDefaultImage = true
+  // Book Icon - To Do - to be added in the future
+  // imgSrc = preBook +getOsisIcon(bk) +".png"
+  // Replace this above with book icons !
+  const bk = (bookObj!=null)?bookObj.bk:null
+  if (bk!=null){ // level 3
+    const checkObj = osisIconList[bk]
+    if (checkObj!=null){
+      if (checkObj[ch]!=null){
+        const prefixIdStr = osisIconId[bk]
+        const firstId = pad(parseInt(ch))
+        checkIcon = `${prefixIdStr.slice(0,2)}/610px/${osisIconId[bk]}_${verseStr}_RG`
+        useDefaultImage = false
+      }
+    }
+  }
+  return useDefaultImage ? preNav +checkIcon +".png" : picsPreNav +checkIcon +".jpg"
 }
 
 export const getLocalMediaFName = (url) => encodeURI("/" + url)

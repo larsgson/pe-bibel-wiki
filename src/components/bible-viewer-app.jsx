@@ -6,7 +6,7 @@ import { isEmptyObj } from '../utils/obj-functions'
 import useBrowserData from '../hooks/useBrowserData'
 import { verseSec } from '../constants/TimeCodes'
 import { verseSumCh } from '../constants/naviChaptersJohn'
-import { gospelOfJohnObjBPlus } from '../constants/readingPlan'
+import { gospelOfJohnObj } from '../constants/naviChaptersJohn'
 import { apiSetStorage, apiGetStorage } from '../utils/api'
 import { uniqueArray } from '../utils/obj-functions'
 import { differenceInCalendarDays, addDays, subDays } from 'date-fns'
@@ -32,7 +32,7 @@ const BibleviewerApp = ({topIdStr,lng}) => {
   const isPlaying = !isEmptyObj(curPlay)
   const [showBiblePassage,setShowBiblePassage] = useState(false)
   const [completedList,setCompletedList] = useState([])
-  const curSerie = {...gospelOfJohnObjBPlus, language: lng}
+  const curSerie = {...gospelOfJohnObj, language: lng}
   const nbrEpisodes = curSerie.episodeList.length
   const firstDateOfPlan = Date.parse(curSerie.beginDate)
   const dateNow = Date.now()
